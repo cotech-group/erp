@@ -29,6 +29,8 @@ model User {
   sessions      Session[]
   auditLogs     AuditLog[]
   mediaFiles    MediaFile[]
+  documents     Document[]
+  docVersions   DocumentVersion[]
 
   @@map("users")
 }
@@ -193,4 +195,73 @@ model MediaFile {
   @@index([mediaType])
   @@index([createdAt])
   @@map("media_files")
+}
+
+// ──────────────────────────────────────
+// GED (Gestion Electronique de Documents)
+// ──────────────────────────────────────
+
+enum DocumentStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+
+  @@map("document_status")
+}
+
+model Document {
+  id            String         @id @default(uuid())
+  title         String
+  description   String?
+  classification String?       // categorie/domaine metier
+  tags          String[]       @default([])
+  status        DocumentStatus @default(DRAFT)
+
+  // Fichier courant (derniere version)
+  currentVersionId String?     @unique @map("current_version_id")
+  currentVersion   DocumentVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+
+  // Droits d'acces documentaires (simplifies pour MVP)
+  isPublic      Boolean        @default(false) @map("is_public")
+
+  createdById   String         @map("created_by_id")
+  createdBy     User           @relation(fields: [createdById], references: [id])
+
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  versions      DocumentVersion[] @relation("DocumentVersions")
+
+  @@index([createdById])
+  @@index([status])
+  @@index([classification])
+  @@index([createdAt])
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id            String   @id @default(uuid())
+  documentId    String   @map("document_id")
+  versionNumber Int      @map("version_number")
+  comment       String?  // description du changement
+
+  // Stockage S3
+  bucket        String
+  objectKey     String   @map("object_key")
+  originalName  String   @map("original_name")
+  mimeType      String   @map("mime_type")
+  size          BigInt
+  checksum      String?  // SHA-256
+
+  uploadedById  String   @map("uploaded_by_id")
+  uploadedBy    User     @relation(fields: [uploadedById], references: [id])
+
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  document      Document @relation("DocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  currentOf     Document? @relation("CurrentVersion")
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId])
+  @@map("document_versions")
 }
