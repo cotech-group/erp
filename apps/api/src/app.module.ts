@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module.js';
 import { AuditModule } from './audit/audit.module.js';
 import { AuthModule } from './auth/auth.module.js';
@@ -7,10 +7,26 @@ import { MessagingModule } from './messaging/messaging.module.js';
 import { MediaModule } from './media/media.module.js';
 import { DocumentsModule } from './documents/documents.module.js';
 import { WorkflowModule } from './workflow/workflow.module.js';
+import { ObservabilityModule } from './observability/observability.module.js';
+import { TraceMiddleware } from './observability/trace.middleware.js';
 import { HealthController } from './health/health.controller.js';
 
 @Module({
-  imports: [DatabaseModule, AuditModule, AuthModule, StorageModule, MessagingModule, MediaModule, DocumentsModule, WorkflowModule],
+  imports: [
+    ObservabilityModule,
+    DatabaseModule,
+    AuditModule,
+    AuthModule,
+    StorageModule,
+    MessagingModule,
+    MediaModule,
+    DocumentsModule,
+    WorkflowModule,
+  ],
   controllers: [HealthController],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TraceMiddleware).forRoutes('*');
+  }
+}
