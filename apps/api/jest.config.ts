@@ -10,7 +10,10 @@ const config: Config = {
       { diagnostics: { ignoreCodes: [151002] } },
     ],
   },
-  collectCoverageFrom: ['**/*.ts', '!**/*.module.ts', '!main.ts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  collectCoverageFrom: ['**/*.ts', '!**/*.module.ts', '!main.ts', '!generated/**'],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
 };
