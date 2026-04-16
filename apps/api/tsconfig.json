@@ -5,7 +5,7 @@
     "rootDir": "./src",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "types": ["node", "jest"],
+    "types": ["node", "jest", "multer"],
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },

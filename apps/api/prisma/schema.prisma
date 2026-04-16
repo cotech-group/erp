@@ -28,6 +28,7 @@ model User {
   refreshTokens RefreshToken[]
   sessions      Session[]
   auditLogs     AuditLog[]
+  mediaFiles    MediaFile[]
 
   @@map("users")
 }
@@ -138,4 +139,58 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ──────────────────────────────────────
+// Media
+// ──────────────────────────────────────
+
+enum MediaStatus {
+  DRAFT
+  PROCESSING
+  PUBLISHED
+  ARCHIVED
+
+  @@map("media_status")
+}
+
+enum MediaType {
+  VIDEO
+  AUDIO
+  IMAGE
+  DOCUMENT
+
+  @@map("media_type")
+}
+
+model MediaFile {
+  id            String      @id @default(uuid())
+  title         String
+  description   String?
+  mediaType     MediaType   @map("media_type")
+  status        MediaStatus @default(DRAFT)
+
+  // Stockage S3
+  bucket        String
+  objectKey     String      @map("object_key")
+  originalName  String      @map("original_name")
+  mimeType      String      @map("mime_type")
+  size          BigInt       // taille en octets
+  checksum      String?     // SHA-256
+
+  // Metadonnees techniques
+  metadata      Json?       // duree, resolution, codec, etc.
+
+  // Relations
+  uploadedById  String      @map("uploaded_by_id")
+  uploadedBy    User        @relation(fields: [uploadedById], references: [id])
+
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@index([uploadedById])
+  @@index([status])
+  @@index([mediaType])
+  @@index([createdAt])
+  @@map("media_files")
 }
