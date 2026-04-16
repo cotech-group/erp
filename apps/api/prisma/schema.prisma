@@ -31,6 +31,8 @@ model User {
   mediaFiles    MediaFile[]
   documents     Document[]
   docVersions   DocumentVersion[]
+  workflowInstancesCreated WorkflowInstance[]
+  workflowActions          WorkflowAction[]
 
   @@map("users")
 }
@@ -264,4 +266,77 @@ model DocumentVersion {
   @@unique([documentId, versionNumber])
   @@index([documentId])
   @@map("document_versions")
+}
+
+// ──────────────────────────────────────
+// Workflow
+// ──────────────────────────────────────
+
+enum WorkflowStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+
+  @@map("workflow_status")
+}
+
+model WorkflowDefinition {
+  id          String   @id @default(uuid())
+  code        String   @unique // MEDIA_PUBLISH, DOC_APPROVAL, FORM_APPROVAL...
+  name        String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  instances   WorkflowInstance[]
+
+  @@map("workflow_definitions")
+}
+
+model WorkflowInstance {
+  id              String         @id @default(uuid())
+  definitionId    String         @map("definition_id")
+  definition      WorkflowDefinition @relation(fields: [definitionId], references: [id])
+
+  // Entite liee (media, document, formulaire...)
+  entityType      String         @map("entity_type") // media, documents, forms...
+  entityId        String         @map("entity_id")
+
+  status          WorkflowStatus @default(PENDING)
+  currentStep     String         @default("review") @map("current_step")
+
+  createdById     String         @map("created_by_id")
+  createdBy       User           @relation(fields: [createdById], references: [id])
+
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  actions         WorkflowAction[]
+
+  @@index([definitionId])
+  @@index([entityType, entityId])
+  @@index([status])
+  @@index([createdById])
+  @@map("workflow_instances")
+}
+
+model WorkflowAction {
+  id              String   @id @default(uuid())
+  instanceId      String   @map("instance_id")
+  instance        WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  actorId         String   @map("actor_id")
+  actor           User     @relation(fields: [actorId], references: [id])
+
+  action          String   // approve, reject, cancel, request_changes
+  comment         String?
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([instanceId])
+  @@index([actorId])
+  @@map("workflow_actions")
 }
