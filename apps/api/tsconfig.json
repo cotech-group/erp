@@ -1,13 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node10",
     "outDir": "./dist",
     "rootDir": "./src",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "types": ["node", "jest", "multer"],
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]
