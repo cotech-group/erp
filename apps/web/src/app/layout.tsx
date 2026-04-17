@@ -1,3 +1,5 @@
+import './globals.css';
+
 export const metadata = {
   title: 'INA ERP',
   description: 'Plateforme ERP pour institut audiovisuel',
