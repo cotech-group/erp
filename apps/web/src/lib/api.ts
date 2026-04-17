@@ -15,10 +15,14 @@ class ApiClient {
 
   setToken(token: string | null) {
     this.token = token;
-    if (token) {
-      if (typeof window !== 'undefined') localStorage.setItem('token', token);
-    } else {
-      if (typeof window !== 'undefined') localStorage.removeItem('token');
+    if (typeof window !== 'undefined') {
+      if (token) {
+        localStorage.setItem('token', token);
+        document.cookie = `ina-auth-token=${token}; path=/; max-age=${15 * 60}; SameSite=Lax`;
+      } else {
+        localStorage.removeItem('token');
+        document.cookie = 'ina-auth-token=; path=/; max-age=0';
+      }
     }
   }
 
