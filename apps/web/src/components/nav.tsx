@@ -4,51 +4,47 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { api } from '@/lib/api';
 
-const links = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/media', label: 'Media' },
-  { href: '/documents', label: 'Documents' },
-  { href: '/workflow', label: 'Workflow' },
+const navItems = [
+  { href: '/dashboard', emoji: '\u{1F4CA}', label: 'Tableau de bord' },
+  { href: '/media', emoji: '\u{1F3AC}', label: 'Media' },
+  { href: '/documents', emoji: '\u{1F4C4}', label: 'Documents' },
+  { href: '/workflow', emoji: '\u{2705}', label: 'Workflows' },
 ];
 
-export function Nav() {
+export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <nav style={{
-      background: '#1a1a2e', padding: '0 1rem', display: 'flex',
-      alignItems: 'center', justifyContent: 'space-between', height: '56px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <Link href="/dashboard" style={{ color: '#fff', fontWeight: 700, fontSize: '1.1rem', textDecoration: 'none' }}>
-          INA ERP
-        </Link>
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              style={{
-                color: pathname === link.href ? '#fff' : '#94a3b8',
-                padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.875rem',
-                background: pathname === link.href ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textDecoration: 'none',
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <div className="sidebar-icon">IN</div>
+        <span className="sidebar-brand">INA ERP</span>
       </div>
-      <button
-        onClick={() => { api.logout(); window.location.href = '/login'; }}
-        style={{
-          background: 'transparent', border: '1px solid #475569', color: '#94a3b8',
-          padding: '0.35rem 0.75rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem',
-        }}
-      >
-        Deconnexion
-      </button>
-    </nav>
+
+      <nav className="sidebar-nav">
+        <div className="sidebar-label">Navigation</div>
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`sidebar-link ${pathname === item.href ? 'active' : ''}`}
+          >
+            <span className="sidebar-link-emoji">{item.emoji}</span>
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+
+      <div className="sidebar-footer">
+        <button
+          onClick={() => { api.logout(); window.location.href = '/login'; }}
+          className="sidebar-link"
+          style={{ width: '100%', border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left' }}
+        >
+          <span className="sidebar-link-emoji">{'\u{1F6AA}'}</span>
+          Deconnexion
+        </button>
+      </div>
+    </aside>
   );
 }

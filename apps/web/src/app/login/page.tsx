@@ -20,49 +20,43 @@ export default function LoginPage() {
       await api.login(email, password);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Erreur de connexion');
+      setError(err.message || 'Identifiants invalides');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-    }}>
-      <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
-        <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>INA ERP</h1>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
-          Connectez-vous a votre compte
-        </p>
+    <div className="login-page">
+      <div className="login-card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <div className="sidebar-icon" style={{ width: 40, height: 40, fontSize: 16 }}>IN</div>
+          <span className="login-title">INA ERP</span>
+        </div>
+        <p className="login-subtitle">Connectez-vous a votre espace de travail</p>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, marginBottom: '0.25rem' }}>Email</label>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="input-group">
+            <label className="input-label">Adresse email</label>
             <input
               type="email" className="input" value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@ina.local" required
+              placeholder="admin@ina.local" required autoFocus
             />
           </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, marginBottom: '0.25rem' }}>Mot de passe</label>
+          <div className="input-group">
+            <label className="input-label">Mot de passe</label>
             <input
               type="password" className="input" value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mot de passe" required
+              placeholder="Votre mot de passe" required
             />
           </div>
 
-          {error && (
-            <p style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{error}</p>
-          )}
+          {error && <div className="login-error">{error}</div>}
 
-          <button type="submit" className="btn btn-primary" disabled={loading}
-            style={{ width: '100%', justifyContent: 'center', padding: '0.65rem' }}
-          >
-            {loading ? 'Connexion...' : 'Se connecter'}
+          <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ width: '100%' }}>
+            {loading ? 'Connexion en cours...' : 'Se connecter'}
           </button>
         </form>
       </div>

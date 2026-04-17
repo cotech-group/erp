@@ -2,17 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { AppShell } from '@/components/app-shell';
 
 interface MediaItem {
   id: string;
   title: string;
   mediaType: string;
   status: string;
-  mimeType: string;
   size: number;
   createdAt: string;
   uploadedBy: { firstName: string; lastName: string };
 }
+
+const formatSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+};
 
 export default function MediaPage() {
   const [items, setItems] = useState<MediaItem[]>([]);
@@ -26,19 +32,9 @@ export default function MediaPage() {
     }).catch(() => { window.location.href = '/login'; });
   }, [page]);
 
-  const formatSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
   return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h1 style={{ fontSize: '1.5rem' }}>Media ({total})</h1>
-      </div>
-
-      <div className="card" style={{ padding: 0, overflow: 'auto' }}>
+    <AppShell title="Media" actions={<span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{total} elements</span>}>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <table>
           <thead>
             <tr>
@@ -51,14 +47,17 @@ export default function MediaPage() {
             </tr>
           </thead>
           <tbody>
+            {items.length === 0 && (
+              <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Aucun media</td></tr>
+            )}
             {items.map((item) => (
               <tr key={item.id}>
                 <td style={{ fontWeight: 500 }}>{item.title}</td>
-                <td><span className="badge badge-draft">{item.mediaType}</span></td>
+                <td><span className={`badge badge-${item.mediaType.toLowerCase()}`}>{item.mediaType}</span></td>
                 <td><span className={`badge badge-${item.status.toLowerCase()}`}>{item.status}</span></td>
-                <td>{formatSize(item.size)}</td>
+                <td style={{ color: 'var(--text-secondary)' }}>{formatSize(item.size)}</td>
                 <td>{item.uploadedBy.firstName} {item.uploadedBy.lastName}</td>
-                <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{new Date(item.createdAt).toLocaleDateString('fr-FR')}</td>
+                <td style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{new Date(item.createdAt).toLocaleDateString('fr-FR')}</td>
               </tr>
             ))}
           </tbody>
@@ -66,12 +65,12 @@ export default function MediaPage() {
       </div>
 
       {total > 20 && (
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem' }}>
-          <button className="btn btn-sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>Precedent</button>
-          <span style={{ padding: '0.25rem 0.5rem', fontSize: '0.85rem' }}>Page {page}</span>
-          <button className="btn btn-sm" onClick={() => setPage((p) => p + 1)} disabled={page * 20 >= total}>Suivant</button>
+        <div className="pagination">
+          <button className="btn btn-sm btn-ghost" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>Precedent</button>
+          <span className="pagination-info">Page {page} sur {Math.ceil(total / 20)}</span>
+          <button className="btn btn-sm btn-ghost" onClick={() => setPage((p) => p + 1)} disabled={page * 20 >= total}>Suivant</button>
         </div>
       )}
-    </>
+    </AppShell>
   );
 }

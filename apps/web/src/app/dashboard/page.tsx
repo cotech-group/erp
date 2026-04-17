@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { AppShell } from '@/components/app-shell';
 
 interface Stats {
   media: number;
@@ -24,25 +25,37 @@ export default function DashboardPage() {
     });
   }, []);
 
-  if (!stats) return <p>Chargement...</p>;
-
-  const cards = [
-    { label: 'Media', value: stats.media, href: '/media', color: '#2563eb' },
-    { label: 'Documents', value: stats.documents, href: '/documents', color: '#16a34a' },
-    { label: 'Workflows en attente', value: stats.workflowPending, href: '/workflow', color: '#d97706' },
-  ];
+  if (!stats) return (
+    <AppShell title="Tableau de bord">
+      <p style={{ color: 'var(--text-muted)' }}>Chargement...</p>
+    </AppShell>
+  );
 
   return (
-    <>
-      <h1 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Tableau de bord</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-        {cards.map((card) => (
-          <a key={card.label} href={card.href} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>{card.label}</p>
-            <p style={{ fontSize: '2rem', fontWeight: 700, color: card.color }}>{card.value}</p>
-          </a>
-        ))}
+    <AppShell title="Tableau de bord">
+      <div className="stat-grid">
+        <a href="/media" className="stat-card">
+          <div className="stat-icon violet">{'\u{1F3AC}'}</div>
+          <div>
+            <div className="stat-label">Media</div>
+            <div className="stat-value">{stats.media}</div>
+          </div>
+        </a>
+        <a href="/documents" className="stat-card">
+          <div className="stat-icon blue">{'\u{1F4C4}'}</div>
+          <div>
+            <div className="stat-label">Documents</div>
+            <div className="stat-value">{stats.documents}</div>
+          </div>
+        </a>
+        <a href="/workflow" className="stat-card">
+          <div className="stat-icon amber">{'\u{23F3}'}</div>
+          <div>
+            <div className="stat-label">Workflows en attente</div>
+            <div className="stat-value">{stats.workflowPending}</div>
+          </div>
+        </a>
       </div>
-    </>
+    </AppShell>
   );
 }
