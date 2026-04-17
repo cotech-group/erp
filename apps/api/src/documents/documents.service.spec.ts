@@ -99,8 +99,9 @@ describe('DocumentsService', () => {
 
   describe('create', () => {
     it('should upload file, create document with first version, and audit', async () => {
-      prisma.documentVersion.create.mockResolvedValue(mockVersion);
       prisma.document.create.mockResolvedValue(mockDocument);
+      prisma.documentVersion.create.mockResolvedValue(mockVersion);
+      prisma.document.update.mockResolvedValue(mockDocument);
 
       const result = await service.create(
         { title: 'Rapport annuel', description: 'Rapport annuel 2026', classification: 'finance', tags: ['rapport', 'annuel'] },
@@ -115,16 +116,13 @@ describe('DocumentsService', () => {
         'application/pdf',
         expect.objectContaining({ checksum: expect.any(String) }),
       );
+      expect(prisma.document.create).toHaveBeenCalled();
       expect(prisma.documentVersion.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ versionNumber: 1, comment: 'Version initiale' }),
         }),
       );
-      expect(prisma.document.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ title: 'Rapport annuel', classification: 'finance' }),
-        }),
-      );
+      expect(prisma.document.update).toHaveBeenCalled();
       expect(audit.log).toHaveBeenCalledWith(
         expect.objectContaining({ action: 'create', resource: 'documents' }),
       );

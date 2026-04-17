@@ -33,9 +33,21 @@ export class DocumentsService {
       'original-name': file.originalname,
     });
 
-    // Create document + first version in transaction
+    // Create document first, then version, then link currentVersion
     const document = await this.prisma.$transaction(async (tx) => {
-      const version = await tx.documentVersion.create({
+      await tx.document.create({
+        data: {
+          id: docId,
+          title: dto.title,
+          description: dto.description,
+          classification: dto.classification,
+          tags: dto.tags ?? [],
+          isPublic: dto.isPublic ?? false,
+          createdById: userId,
+        },
+      });
+
+      await tx.documentVersion.create({
         data: {
           id: versionId,
           documentId: docId,
@@ -51,17 +63,9 @@ export class DocumentsService {
         },
       });
 
-      const doc = await tx.document.create({
-        data: {
-          id: docId,
-          title: dto.title,
-          description: dto.description,
-          classification: dto.classification,
-          tags: dto.tags ?? [],
-          isPublic: dto.isPublic ?? false,
-          currentVersionId: versionId,
-          createdById: userId,
-        },
+      const doc = await tx.document.update({
+        where: { id: docId },
+        data: { currentVersionId: versionId },
         include: { currentVersion: true },
       });
 
