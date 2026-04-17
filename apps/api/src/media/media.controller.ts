@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { CacheTTL } from '../observability/cache-control.interceptor.js';
 import { MediaService } from './media.service.js';
 import { UploadMediaDto, MediaQueryDto } from './dto/index.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -56,20 +57,23 @@ export class MediaController {
   }
 
   @Get()
+  @CacheTTL(30)
   async findAll(@Query() query: MediaQueryDto) {
-    const { data, total } = await this.mediaService.findAll(query);
+    const { data, total, nextCursor } = await this.mediaService.findAll(query);
     return {
       data,
       meta: {
         total,
-        page: Number(query.page) || 1,
+        page: query.cursor ? undefined : (Number(query.page) || 1),
         limit: Math.min(Number(query.limit) || 20, 100),
+        nextCursor,
         timestamp: new Date().toISOString(),
       },
     };
   }
 
   @Get(':id')
+  @CacheTTL(60)
   async findOne(@Param('id') id: string) {
     const media = await this.mediaService.findOne(id);
     return {

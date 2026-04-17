@@ -3,6 +3,11 @@ import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class DocumentQueryDto {
+  @ApiPropertyOptional({ description: 'Cursor ID for cursor-based pagination (overrides page)' })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+
   @ApiPropertyOptional({ default: 1 })
   @IsOptional()
   @Type(() => Number)

@@ -90,14 +90,35 @@ export class MediaService {
     return media;
   }
 
-  async findAll(query: MediaQueryDto): Promise<{ data: MediaFile[]; total: number }> {
-    const page = Number(query.page) || 1;
+  async findAll(query: MediaQueryDto): Promise<{ data: MediaFile[]; total: number; nextCursor?: string }> {
     const limit = Math.min(Number(query.limit) || 20, 100);
-    const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
     if (query.status) where['status'] = query.status;
     if (query.mediaType) where['mediaType'] = query.mediaType;
+
+    // Cursor-based pagination (preferred for performance)
+    if (query.cursor) {
+      const data = await this.prisma.mediaFile.findMany({
+        where,
+        take: limit + 1, // fetch one extra to determine if there's a next page
+        cursor: { id: query.cursor },
+        skip: 1, // skip the cursor item itself
+        orderBy: { createdAt: 'desc' },
+        include: { uploadedBy: { select: { id: true, firstName: true, lastName: true, email: true } } },
+      });
+
+      const hasNext = data.length > limit;
+      const results = hasNext ? data.slice(0, limit) : data;
+      const nextCursor = hasNext ? results[results.length - 1]?.id : undefined;
+
+      const total = await this.prisma.mediaFile.count({ where });
+      return { data: results, total, nextCursor };
+    }
+
+    // Offset-based pagination (fallback)
+    const page = Number(query.page) || 1;
+    const skip = (page - 1) * limit;
 
     const [data, total] = await this.prisma.$transaction([
       this.prisma.mediaFile.findMany({

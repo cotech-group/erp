@@ -4,6 +4,7 @@ import { MetricsService } from './metrics.service.js';
 import { MetricsController } from './metrics.controller.js';
 import { LoggingInterceptor } from './logging.interceptor.js';
 import { MetricsInterceptor } from './metrics.interceptor.js';
+import { CacheControlInterceptor } from './cache-control.interceptor.js';
 
 const logger = createLogger('ina-api');
 
@@ -15,7 +16,8 @@ const logger = createLogger('ina-api');
     MetricsService,
     LoggingInterceptor,
     MetricsInterceptor,
+    CacheControlInterceptor,
   ],
-  exports: ['APP_LOGGER', MetricsService, LoggingInterceptor, MetricsInterceptor],
+  exports: ['APP_LOGGER', MetricsService, LoggingInterceptor, MetricsInterceptor, CacheControlInterceptor],
 })
 export class ObservabilityModule {}

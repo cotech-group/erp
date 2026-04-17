@@ -3,10 +3,12 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import compression from 'compression';
 import { AppModule } from './app.module';
 import { createLogger } from '@ina-erp/observability';
 import { LoggingInterceptor } from './observability/logging.interceptor';
 import { MetricsInterceptor } from './observability/metrics.interceptor';
+import { CacheControlInterceptor } from './observability/cache-control.interceptor';
 import { GlobalExceptionFilter } from './observability/http-exception.filter';
 
 async function bootstrap() {
@@ -15,6 +17,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: false,
   });
+
+  // Performance
+  app.use(compression());
 
   // Security
   app.use(helmet());
@@ -50,6 +55,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     app.get(LoggingInterceptor),
     app.get(MetricsInterceptor),
+    app.get(CacheControlInterceptor),
   );
   app.useGlobalFilters(new GlobalExceptionFilter(logger));
 

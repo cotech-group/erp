@@ -139,10 +139,13 @@ export class DocumentsService {
     return version;
   }
 
-  async findAll(query: DocumentQueryDto): Promise<{ data: Document[]; total: number }> {
-    const page = Number(query.page) || 1;
+  private readonly docInclude = {
+    currentVersion: { select: { id: true, versionNumber: true, originalName: true, mimeType: true, size: true, createdAt: true } },
+    createdBy: { select: { id: true, firstName: true, lastName: true, email: true } },
+  } as const;
+
+  async findAll(query: DocumentQueryDto): Promise<{ data: Document[]; total: number; nextCursor?: string }> {
     const limit = Math.min(Number(query.limit) || 20, 100);
-    const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
     if (query.status) where['status'] = query.status;
@@ -151,16 +154,36 @@ export class DocumentsService {
       where['title'] = { contains: query.search, mode: 'insensitive' };
     }
 
+    // Cursor-based pagination
+    if (query.cursor) {
+      const data = await this.prisma.document.findMany({
+        where,
+        take: limit + 1,
+        cursor: { id: query.cursor },
+        skip: 1,
+        orderBy: { updatedAt: 'desc' },
+        include: this.docInclude,
+      });
+
+      const hasNext = data.length > limit;
+      const results = hasNext ? data.slice(0, limit) : data;
+      const nextCursor = hasNext ? results[results.length - 1]?.id : undefined;
+      const total = await this.prisma.document.count({ where });
+
+      return { data: results, total, nextCursor };
+    }
+
+    // Offset-based pagination
+    const page = Number(query.page) || 1;
+    const skip = (page - 1) * limit;
+
     const [data, total] = await this.prisma.$transaction([
       this.prisma.document.findMany({
         where,
         skip,
         take: limit,
         orderBy: { updatedAt: 'desc' },
-        include: {
-          currentVersion: { select: { id: true, versionNumber: true, originalName: true, mimeType: true, size: true, createdAt: true } },
-          createdBy: { select: { id: true, firstName: true, lastName: true, email: true } },
-        },
+        include: this.docInclude,
       }),
       this.prisma.document.count({ where }),
     ]);
