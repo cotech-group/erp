@@ -14,6 +14,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { MediaService } from './media.service.js';
 import { UploadMediaDto, MediaQueryDto } from './dto/index.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -27,6 +28,8 @@ import type { MediaStatus } from '../generated/prisma/client.js';
   return Number(this);
 };
 
+@ApiTags('Media')
+@ApiBearerAuth()
 @Controller('media')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class MediaController {
@@ -34,6 +37,7 @@ export class MediaController {
 
   @Post('upload')
   @HttpCode(HttpStatus.CREATED)
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 500 * 1024 * 1024 } })) // 500MB max
   async upload(
     @UploadedFile() file: Express.Multer.File | undefined,

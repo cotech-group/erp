@@ -16,6 +16,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { Response } from 'express';
 import { DocumentsService } from './documents.service.js';
 import { CreateDocumentDto, UploadVersionDto, DocumentQueryDto } from './dto/index.js';
@@ -30,6 +31,8 @@ import type { DocumentStatus } from '../generated/prisma/client.js';
   return Number(this);
 };
 
+@ApiTags('Documents (GED)')
+@ApiBearerAuth()
 @Controller('documents')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DocumentsController {
@@ -37,6 +40,7 @@ export class DocumentsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 100 * 1024 * 1024 } })) // 100MB
   async create(
     @UploadedFile() file: Express.Multer.File | undefined,
@@ -102,6 +106,7 @@ export class DocumentsController {
 
   @Post(':id/versions')
   @HttpCode(HttpStatus.CREATED)
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 100 * 1024 * 1024 } }))
   async uploadVersion(
     @Param('id') id: string,

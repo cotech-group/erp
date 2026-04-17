@@ -1,4 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { DatabaseModule } from './database/database.module.js';
 import { AuditModule } from './audit/audit.module.js';
 import { AuthModule } from './auth/auth.module.js';
@@ -13,6 +14,10 @@ import { HealthController } from './health/health.controller.js';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      { name: 'short', ttl: 1000, limit: 20 },   // 20 req/s
+      { name: 'medium', ttl: 60000, limit: 100 }, // 100 req/min
+    ]),
     ObservabilityModule,
     DatabaseModule,
     AuditModule,

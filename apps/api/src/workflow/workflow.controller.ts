@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { WorkflowService } from './workflow.service.js';
 import {
   CreateDefinitionDto,
@@ -22,6 +23,8 @@ import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../auth/auth.service.js';
 
+@ApiTags('Workflow')
+@ApiBearerAuth()
 @Controller('workflow')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class WorkflowController {
