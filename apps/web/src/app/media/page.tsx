@@ -33,7 +33,7 @@ export default function MediaPage() {
   }, [page]);
 
   return (
-    <AppShell title="Media" actions={<span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{total} elements</span>}>
+    <AppShell title="Media" actions={<><span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginRight: '0.5rem' }}>{total} elements</span><a href="/media/upload" className="btn btn-primary btn-sm">Uploader</a></>}>
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <table>
           <thead>

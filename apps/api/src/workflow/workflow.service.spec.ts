@@ -11,11 +11,13 @@ import {
 import { WorkflowService } from './workflow.service';
 import { PrismaService } from '../database/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('WorkflowService', () => {
   let service: WorkflowService;
   let prisma: Record<string, any>;
   let audit: Record<string, any>;
+  let notifications: Record<string, any>;
 
   const mockDefinition = {
     id: 'def-1',
@@ -79,8 +81,16 @@ describe('WorkflowService', () => {
       }),
     };
 
+    prisma.user = {
+      findUnique: jest.fn().mockResolvedValue({ firstName: 'Test', lastName: 'User' }),
+    };
+
     audit = {
       log: jest.fn().mockResolvedValue(undefined),
+    };
+
+    notifications = {
+      notifyWorkflowAction: jest.fn().mockResolvedValue(undefined),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -88,6 +98,7 @@ describe('WorkflowService', () => {
         WorkflowService,
         { provide: PrismaService, useValue: prisma },
         { provide: AuditService, useValue: audit },
+        { provide: NotificationsService, useValue: notifications },
       ],
     }).compile();
 

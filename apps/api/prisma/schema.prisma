@@ -33,6 +33,7 @@ model User {
   docVersions   DocumentVersion[]
   workflowInstancesCreated WorkflowInstance[]
   workflowActions          WorkflowAction[]
+  notifications            Notification[]
 
   @@map("users")
 }
@@ -339,4 +340,26 @@ model WorkflowAction {
   @@index([instanceId])
   @@index([actorId])
   @@map("workflow_actions")
+}
+
+// ──────────────────────────────────────
+// Notifications
+// ──────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      String   // workflow.approved, workflow.rejected, media.processed, document.updated
+  title     String
+  message   String
+  link      String?  // deep link vers la ressource
+  read      Boolean  @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, read])
+  @@index([createdAt])
+  @@map("notifications")
 }

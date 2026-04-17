@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service.js';
 import { AuditService } from '../audit/audit.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import type {
   CreateDefinitionDto,
   StartWorkflowDto,
@@ -30,6 +31,7 @@ export class WorkflowService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // ── Definitions ──────────────────────
@@ -214,6 +216,25 @@ export class WorkflowService {
         newStatus: newStatus ?? instance.status,
       },
     });
+
+    // Notify the workflow creator
+    if (instance.createdById !== userId) {
+      const actor = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { firstName: true, lastName: true },
+      });
+      const actorName = actor ? `${actor.firstName} ${actor.lastName}` : 'Un utilisateur';
+
+      await this.notifications.notifyWorkflowAction({
+        recipientUserId: instance.createdById,
+        actorName,
+        action: dto.action,
+        workflowName: (instance as any).definition?.name ?? 'Workflow',
+        entityType: instance.entityType,
+        entityId: instance.entityId,
+        instanceId,
+      });
+    }
 
     return action;
   }

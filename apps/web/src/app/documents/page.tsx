@@ -34,11 +34,14 @@ export default function DocumentsPage() {
     <AppShell
       title="Documents"
       actions={
-        <input
-          className="input" placeholder="Rechercher un document..."
-          style={{ width: '280px' }}
-          value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-        />
+        <>
+          <input
+            className="input" placeholder="Rechercher..."
+            style={{ width: '220px' }}
+            value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+          <a href="/documents/upload" className="btn btn-primary btn-sm">Deposer</a>
+        </>
       }
     >
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>

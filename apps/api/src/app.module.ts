@@ -9,6 +9,8 @@ import { MediaModule } from './media/media.module.js';
 import { DocumentsModule } from './documents/documents.module.js';
 import { WorkflowModule } from './workflow/workflow.module.js';
 import { OdooModule } from './odoo/odoo.module.js';
+import { SearchModule } from './search/search.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 import { ObservabilityModule } from './observability/observability.module.js';
 import { TraceMiddleware } from './observability/trace.middleware.js';
 import { HealthController } from './health/health.controller.js';
@@ -29,6 +31,8 @@ import { HealthController } from './health/health.controller.js';
     DocumentsModule,
     WorkflowModule,
     OdooModule,
+    SearchModule,
+    NotificationsModule,
   ],
   controllers: [HealthController],
 })
