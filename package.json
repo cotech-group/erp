@@ -11,7 +11,9 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "seed:dev": "pnpm --filter=@ina-erp/api db:seed",
+    "seed:reset": "pnpm --filter=@ina-erp/api db:reset"
   },
   "engines": {
     "node": ">=20",
